@@ -135,12 +135,13 @@ async def update(ctx:commands.Context, *args):
             dated_games_string += f"{nl}**Game {index}:**" + value
             index +=1
 
-    if len(undated_games) > 0:         
+    if len(undated_games) > 0:   
+        undated_games_string = "## Without Correct Date:"
         for game_string in undated_games:
             undated_games_string += f"{nl}**Game {index}:**" + game_string 
             index += 1
     
-    final_message = f'# This channel has {counter} games listed:{nl}{dated_games_string}{nl}## Without Correct Date:{undated_games_string}'
+    final_message = f'# This channel has {counter} games listed:{nl}{dated_games_string}{nl}{undated_games_string}'
     if (shedule_exists): 
         await shedule_message.edit(content=final_message)
     else: 
