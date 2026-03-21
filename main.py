@@ -58,8 +58,8 @@ async def update(ctx:commands.Context, *args):
     dated_games = {}
     undated_games = []
 
-    # Below is the main loop, going through the whole message history of that channel (up to 500 messages) and reading each message from newest to oldest
-    async for message in ctx.channel.history(limit=500):
+    # Below is the main loop, going through the whole message history of that channel and reading each message from newest to oldest
+    async for message in ctx.channel.history(limit=None):
         content = message.content
         if message.author == bot.user: # This checks for an existing schedule message to later either edit that or send a new one if none exists
             shedule_exists = True
