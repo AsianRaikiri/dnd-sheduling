@@ -118,7 +118,6 @@ async def update(ctx:commands.Context, *args):
             undated_game_string = f"{nl}{depr}Ranks: {rank_string}{depr}{nl}{depr}Characters: {char_string}{depr}{nl}{depr}Players: {player_string}{depr}{nl}{depr}Link: {message_link}{depr}{nl}"
             if date != "":
                 actual_date = datetime.strptime(date, "%m/%d/%Y")
-                actual_date.month
                 dated_games[actual_date] = dated_game_string
             else: 
                 undated_games.append(undated_game_string)
@@ -136,10 +135,10 @@ async def update(ctx:commands.Context, *args):
             dated_games_string += f"{nl}**Game {index}:**" + value
             index +=1
 
-            
-    for game_string in undated_games:
-        undated_games_string += f"{nl}**Game {index}:**" + game_string 
-        index += 1
+    if len(undated_games) > 0:         
+        for game_string in undated_games:
+            undated_games_string += f"{nl}**Game {index}:**" + game_string 
+            index += 1
     
     final_message = f'# This channel has {counter} games listed:{nl}{dated_games_string}{nl}## Without Correct Date:{undated_games_string}'
     if (shedule_exists): 
