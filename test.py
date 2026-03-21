@@ -12,7 +12,7 @@ bot = commands.Bot(command_prefix='$', intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f'Logged on as {self.user}!')
+    print(f'Logged on as {bot.user}!')
 @bot.event
 async def on_message(message):
     print(f'Message from {message.author}: {message.content}')
@@ -35,5 +35,4 @@ async def test_message(ctx:commands.Context, *args):
     end_message = "\n".join(message_list)
     await ctx.send(f'These are the messages sent: {end_message}')
 
-client = MyClient(intents=intents)
-client.run(os.getenv('API-TOKEN'))
+bot.run(os.getenv('API-TOKEN'))
