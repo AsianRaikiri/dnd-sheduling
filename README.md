@@ -6,7 +6,7 @@ Install python and the requirements via following command
 pip install ./requirements.txt
 ```
 # Usage
-Create an env file from the .env_template and start the bot using following command
+Create an env file from the .env_template and add the API Token for your own bot and start the bot using following command
 ```bash
 python3 main.py
 ``` 

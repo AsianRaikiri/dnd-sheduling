@@ -63,7 +63,7 @@ async def update(ctx:commands.Context, *args):
         if message.author == bot.user:
             list_exists = True
             list_message = message
-        if "$list_messages" in content:
+        if "$update" in content:
             await message.delete()
         content_list = content.splitlines()
         date = ""
@@ -95,8 +95,8 @@ async def update(ctx:commands.Context, *args):
             if message.reactions: 
                 found_dm = True
             for level in uniquelevels:
-                ranks.append(player_ranks[level])
-            ranks = list(set(ranks))
+                if player_ranks[level] not in ranks:
+                    ranks.append(player_ranks[level])
             rank_string = "/".join(ranks)                
             char_string = ", ".join(chars)
             player_string = ", ".join(players)
