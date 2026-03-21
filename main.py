@@ -48,33 +48,34 @@ async def on_ready():
 
 @bot.command()
 async def update(ctx:commands.Context, *args):
+    await ctx.message.delete()
     counter = 0
     nl = "\n"
-    list_exists= False
-    list_message = None
+    shedule_exists = False
+    shedule_message = None
     dated_games = {}
     undated_games = []
     async for message in ctx.channel.history(limit=500):
         content = message.content
-        players_raw = message.mentions
-        players= []
-        for user in players_raw: 
-            players.append(user.display_name)
         if message.author == bot.user:
-            list_exists = True
-            list_message = message
-        if "$update" in content:
-            await message.delete()
-        content_list = content.splitlines()
+            shedule_exists = True
+            shedule_message = message
+        players= []
+        message_list = content.splitlines()
         date = ""
-        chars = []
+        characters = []
         levels = []
+
         message_link = message.jump_url
-        for line in content_list:
+        players_objects = message.mentions
+        for user in players_objects: 
+            players.append(user.display_name)
+
+        for line in message_list:
             if "@" in line and line.startswith("<"): 
                 char_match = search(r">\s*\w+", line)
                 if char_match: 
-                    chars.append(char_match.group().removeprefix(">").strip())
+                    characters.append(char_match.group().removeprefix(">").strip())
                 level_match = search(r" \d{1,2}$", line)
                 if level_match: 
                     levels.append(int(level_match.group().strip()))
@@ -83,33 +84,47 @@ async def update(ctx:commands.Context, *args):
                 date_match=search(r"\d+/\d+/\d+", line)
                 if date_match:
                     date = date_match.group()
-        uniquelevels = list(set(levels))
-        uniquelevels.sort()
-        chars.sort()
-        ranks = []
-        if levels and chars:
+                    
+        levels.sort()
+        characters.sort()
+
+        if levels and characters:
             counter += 1
-            found_dm = False
+            dm_exists = False
+            ranks = []
+            dm = None
+            
             if message.reactions: 
-                found_dm = True
-            for level in uniquelevels:
+                dm_exists = True
+                for reaction in message.reactions:
+                    async for user in reaction.users():
+                        dm = user.display_name
+                        if dm in players:
+                            players.remove(dm)
+
+            for level in levels:
                 if player_ranks[level] not in ranks:
                     ranks.append(player_ranks[level])
+
             rank_string = "/".join(ranks)                
-            char_string = ", ".join(chars)
+            char_string = ", ".join(characters)
             player_string = ", ".join(players)
-            deprecated = ""
-            if (found_dm):
-                deprecated = "~~"
-            dated_game = f"{nl}**Game**{nl}{deprecated}Date: {date}{deprecated}{nl}{deprecated}Ranks: {rank_string}{deprecated}{nl}{deprecated}Characters: {char_string}{deprecated}{nl}{deprecated}Players: {player_string}{deprecated}{nl}{deprecated}Link: {message_link}{deprecated}{nl}"
-            undated_game = f"{nl}**Game**{nl}{deprecated}Ranks: {rank_string}{deprecated}{nl}{deprecated}Characters: {char_string}{deprecated}{nl}{deprecated}Players: {player_string}{deprecated}{nl}{deprecated}Link: {message_link}{deprecated}{nl}"
+
+            depr = ""
+            if (dm_exists):
+                depr = "~~"
+
+            dated_game_string = f"{nl}{depr}Date: {date}{depr}{nl}{depr}Ranks: {rank_string}{depr}{nl}{depr}Characters: {char_string}{depr}{nl}{depr}Players: {player_string}{depr}{nl}{depr}Link: {message_link}{depr}{nl}"
+            undated_game_string = f"{nl}{depr}Ranks: {rank_string}{depr}{nl}{depr}Characters: {char_string}{depr}{nl}{depr}Players: {player_string}{depr}{nl}{depr}Link: {message_link}{depr}{nl}"
             if date != "":
                 actual_date = datetime.strptime(date, "%m/%d/%Y")
                 actual_date.month
-                dated_games[actual_date] = dated_game
+                dated_games[actual_date] = dated_game_string
             else: 
-                undated_games.append(undated_game)
-    dated_games_string= ""
+                undated_games.append(undated_game_string)
+    dated_games_string = ""
+    undated_games_string = ""
+    index = 1 
     if len(dated_games) > 0:
         sorted_dated_games = dict(sorted(dated_games.items()))
         current_month = ""
@@ -118,13 +133,17 @@ async def update(ctx:commands.Context, *args):
             if current_month != new_month:
                 current_month = new_month
                 dated_games_string += f"## For {new_month}:{nl}"
-            dated_games_string += value
+            dated_games_string += f"{nl}**Game {index}:**" + value
+            index +=1
+
             
-        
-    undated_games_string = "\n".join(undated_games)
-    final_message = f'# This channel has {counter} games listed:{nl}{dated_games_string} {nl}## Without Correct Date:{undated_games_string}'
-    if (list_exists): 
-        await list_message.edit(content=final_message)
+    for game_string in undated_games:
+        undated_games_string += f"{nl}**Game {index}:**" + game_string 
+        index += 1
+    
+    final_message = f'# This channel has {counter} games listed:{nl}{dated_games_string}{nl}## Without Correct Date:{undated_games_string}'
+    if (shedule_exists): 
+        await shedule_message.edit(content=final_message)
     else: 
         await ctx.send(final_message)
 
