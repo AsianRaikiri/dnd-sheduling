@@ -131,7 +131,7 @@ async def update(ctx:commands.Context, *args):
             new_month = curr_date.strftime("%B")
             if current_month != new_month:
                 current_month = new_month
-                dated_games_string += f"## For {new_month}:{nl}"
+                dated_games_string += f"## {new_month}:{nl}"
             dated_games_string += f"{nl}**Game {index}:**" + value
             index +=1
 
