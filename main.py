@@ -83,8 +83,6 @@ async def update(ctx:commands.Context, *args):
                 date_match=search(r"\d+/\d+/\d+", line)
                 if date_match:
                     date = date_match.group()
-            if line.lower().startswith("dm:") and "<" in line and len(players) > 0: 
-                players.pop()
         uniquelevels = list(set(levels))
         uniquelevels.sort()
         chars.sort()
