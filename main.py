@@ -68,10 +68,6 @@ async def update(ctx:commands.Context, *args):
         date = ""
         characters = []
         levels = []
-        
-        players_objects = message.mentions # This returns a list of all players + dm that were mentioned if given
-        for user in players_objects: 
-            players.append(user.display_name) # Have to check if full display name should be used
 
         message_list = content.splitlines()
         for line in message_list:
@@ -95,35 +91,34 @@ async def update(ctx:commands.Context, *args):
             characters.sort()
             dm_exists = False
             ranks = []
-            dm = None
+            dm_name = None
             message_link = message.jump_url # to later reference in the final post
             
             if message.reactions: # Since only one DM is supposed to react to the messages, this checks if a dm is associated to the post
                 dm_exists = True
                 for reaction in message.reactions: # This whole part can be removed if we don't need to list all players in a game
                     async for user in reaction.users():
-                        dm = user.display_name
-                        if dm in players:
-                            players.remove(dm)
-
+                        dm_name = user.display_name
             for level in levels: 
                 if player_ranks[level] not in ranks: # This prevents the same rank to be added multiple times
                     ranks.append(player_ranks[level])
 
             rank_string = "/".join(ranks)                
             char_string = ", ".join(characters)
-            player_string = ", ".join(players)
+            picked_up = ""
+            if dm_exists: 
+                picked_up = f"Picked Up by: {dm_name}{nl}"
+                if message.thread:
+                    thread_link = message.thread.jump_url
+                    picked_up += f"Thread:{thread_link}{nl}"
 
-            depr = ""
-            if (dm_exists): # If there is DM associated with the post, it can be crossed out to show it in the Schedule
-                depr = "~~"
 
             if date != "":
                 actual_date = datetime.strptime(date, "%m/%d/%Y")
-                dated_game_string = f"{nl}{depr}Date: {date}{depr}{nl}{depr}Ranks: {rank_string}{depr}{nl}{depr}Characters: {char_string}{depr}{nl}{depr}Players: {player_string}{depr}{nl}{depr}Link:{message_link}{depr}{nl}"
+                dated_game_string = f"{nl}Date: {date}{nl}Ranks: {rank_string}{nl}Characters: {char_string}{nl}Link:{message_link}{nl}" + picked_up
                 dated_games[actual_date] = dated_game_string
             else: 
-                undated_game_string = f"{nl}{depr}Ranks: {rank_string}{depr}{nl}{depr}Characters: {char_string}{depr}{nl}{depr}Players: {player_string}{depr}{nl}{depr}Link:{message_link}{depr}{nl}"
+                undated_game_string = f"{nl}Ranks: {rank_string}{nl}Characters: {char_string}{nl}Link:{message_link}{nl}" + picked_up
                 undated_games.append(undated_game_string)
     dated_games_string = ""
     undated_games_string = ""
@@ -131,20 +126,20 @@ async def update(ctx:commands.Context, *args):
     if len(dated_games) > 0:
         sorted_dated_games = dict(sorted(dated_games.items()))
         current_month = ""
-        for curr_date, value in sorted_dated_games.items():
+        for curr_date, game_string in sorted_dated_games.items():
             new_month = curr_date.strftime("%B") # This returns the full name of the month of the datetime object
             if current_month != new_month:
                 current_month = new_month
                 dated_games_string += f"## {new_month}:{nl}"
             index +=1
-            dated_games_string += f"{nl}**Game {index}:**" + value
+            dated_games_string += game_string
 
 
     if len(undated_games) > 0:
         undated_games_string = "## Without Correct Date:"
         for game_string in undated_games:
             index += 1
-            undated_games_string += f"{nl}**Game {index}:**" + game_string
+            undated_games_string += game_string
 
     final_message = f'# This channel has {index} games listed:{nl}{dated_games_string}{nl}{undated_games_string}'
 
